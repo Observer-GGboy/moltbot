@@ -365,8 +365,7 @@ export function parseCliJsonl(raw: string, backend: CliBackendConfig): CliOutput
   }
   let sessionId: string | undefined;
   let usage: CliUsage | undefined;
-  const messageTexts: string[] = [];
-  const fallbackTexts: string[] = [];
+  const texts: string[] = [];
   for (const line of lines) {
     let parsed: unknown;
     try {
@@ -390,21 +389,11 @@ export function parseCliJsonl(raw: string, backend: CliBackendConfig): CliOutput
     if (item && typeof item.text === "string") {
       const type = typeof item.type === "string" ? item.type.toLowerCase() : "";
       if (!type || type.includes("message")) {
-        messageTexts.push(item.text);
-      } else {
-        fallbackTexts.push(item.text);
-      }
-    }
-    // Also try top-level text/content fields (non-item JSONL formats)
-    if (!item) {
-      const lineText = collectText(parsed);
-      if (lineText) {
-        fallbackTexts.push(lineText);
+        texts.push(item.text);
       }
     }
   }
-  // Prefer message-type texts; fall back to any other text-bearing items
-  const text = (messageTexts.length > 0 ? messageTexts : fallbackTexts).join("\n").trim();
+  const text = texts.join("\n").trim();
   if (!text) {
     return null;
   }
